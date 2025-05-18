@@ -13,4 +13,11 @@ model Vibe {
   note      String?
   createdAt DateTime @default(now())
 } 
+model Goal {
+  id        String   @id @default(uuid())
+  text      String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+} 
+
 

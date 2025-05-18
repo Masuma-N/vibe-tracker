@@ -18,7 +18,7 @@ export default function HomePage() {
 
   useEffect(() => {
     fetch('/api/vibes')
-      .then(res => res.json())
+      .then(res => res.json())  
       .then(setVibes)
       .catch(() => setError('Failed to load vibes'));
   }, []);
@@ -102,14 +102,14 @@ export default function HomePage() {
           {vibes.map(vibe => (
             <li
               key={vibe.id}
-              className="border rounded p-3 shadow-sm bg-white"
+              className="border rounded p-3 shadow-sm bg-gray-100 text-black"
             >
               <div className="text-lg">{vibe.mood}</div>
               {vibe.note && <p className="text-gray-600">{vibe.note}</p>}
               <small className="text-gray-400">
                 {new Date(vibe.createdAt).toLocaleString()}
               </small>
-            </li>
+            </li> 
           ))}
         </ul>
       </section>
