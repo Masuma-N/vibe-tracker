@@ -45,7 +45,7 @@ export default function HomePage() {
   async function submitVibe(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!mood) {
+    if (!mood) { 
       setError('Please select a mood');
       return;
     }
@@ -201,16 +201,35 @@ export default function HomePage() {
   {goals.map(goal => (
     <li
       key={goal.id}
-      className="border rounded p-3 shadow-sm bg-white text-black flex items-center space-x-3"
+      className="border rounded p-3 shadow-sm bg-white text-black flex items-center justify-between"
     >
-      <input
-        type="checkbox"
-        checked={goal.completed}
-        onChange={() => toggleGoalCompletion(goal.id, goal.completed)}
-      />
-      <span className={goal.completed ? 'line-through text-gray-500' : ''}>
-        {goal.text}
-      </span>
+      <div className="flex items-center space-x-3">
+        <input
+          type="checkbox"
+          checked={goal.completed}
+          onChange={() => toggleGoalCompletion(goal.id, goal.completed)}
+        />
+        <span className={goal.completed ? 'line-through text-gray-500' : ''}>
+          {goal.text}
+        </span>
+      </div>
+
+      <button
+        onClick={async () => {
+          try {
+            const res = await fetch(`/api/goals?id=${goal.id}`, {
+              method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Delete failed');
+            setGoals(goals.filter(g => g.id !== goal.id));
+          } catch (err) {
+            console.error('Delete error:', err);
+          }
+        }}
+        className="text-red-500 text-sm hover:underline"
+      >
+        🗑️
+      </button>
     </li>
   ))} 
 </ul>
