@@ -138,17 +138,33 @@ export default function HomePage() {
         {vibes.length === 0 && <p>No vibes logged yet.</p>}
         <ul className="space-y-3">
           {vibes.map(vibe => (
-            <li
-              key={vibe.id}
-              className="border rounded p-3 shadow-sm bg-gray-100 text-black"
-            >
-              <div className="text-lg">{vibe.mood}</div>
-              {vibe.note && <p className="text-gray-600">{vibe.note}</p>}
-              <small className="text-gray-400">
-                {new Date(vibe.createdAt).toLocaleString()}
-              </small>
-            </li> 
-          ))}
+  <li key={vibe.id} className="border rounded p-3 shadow-sm bg-gray-100 text-black flex justify-between">
+    <div>
+      <div className="text-lg">{vibe.mood}</div>
+      {vibe.note && <p className="text-gray-600">{vibe.note}</p>}
+      <small className="text-gray-400">
+        {new Date(vibe.createdAt).toLocaleString()}
+      </small>
+    </div> 
+    <button
+      onClick={async () => {
+        try {
+          const res = await fetch(`/api/vibes?id=${vibe.id}`, {
+            method: 'DELETE',
+          });
+          if (!res.ok) throw new Error('Delete failed');
+          setVibes(vibes.filter(v => v.id !== vibe.id));
+        } catch (err) {
+          console.error('Vibe delete error:', err);
+        }
+      }}
+      className="text-red-500 text-sm hover:underline ml-4"
+    >
+      🗑️
+    </button>
+  </li>
+))}
+
         </ul>
       </section>
       <section className="mt-10">
@@ -173,7 +189,7 @@ export default function HomePage() {
         if (!res.ok) throw new Error('Failed to add goal');
 
         const newGoal = await res.json();
-        setGoals([newGoal, ...goals]);
+        setGoals([newGoal, ...goals]); 
         setGoalText('');
       } catch {
         setGoalError('Error submitting goal');
@@ -238,5 +254,5 @@ export default function HomePage() {
 
     </main>
   );
-}  
+}   
 

@@ -55,5 +55,27 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
   }
 } 
+export async function POST(req: NextRequest) {
+  try {
+    const { text } = await req.json();
+
+    if (!text) {
+      return NextResponse.json({ error: 'Goal text is required' }, { status: 400 });
+    }
+
+    const newGoal = await prisma.goal.create({
+      data: {
+        text,
+        completed: false,
+      },
+    });
+
+    return NextResponse.json(newGoal, { status: 201 });
+  } catch (error) {
+    console.error('POST /api/goals error:', error);
+    return NextResponse.json({ error: 'Failed to create goal' }, { status: 500 });
+  }
+} 
+
 
 
