@@ -1,31 +1,39 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export async function GET() {
-  const goals = await prisma.goal.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
-  return NextResponse.json(goals);
+  try {
+    const goals = await prisma.goal.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    return NextResponse.json(goals);
+  } catch (error) {
+    console.error('GET /api/goals error:', error);
+    return NextResponse.json({ error: 'Failed to load goals' }, { status: 500 });
+  }
 }
 
-export async function POST(req: Request) {
+export async function PATCH(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { text } = body;
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    const { completed } = await req.json();
 
-    if (!text) {
-      return NextResponse.json({ error: 'Text is required' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'Missing goal ID' }, { status: 400 });
     }
 
-    const newGoal = await prisma.goal.create({
-      data: { text },
+    const updatedGoal = await prisma.goal.update({
+      where: { id },
+      data: { completed },
     });
 
-    return NextResponse.json(newGoal, { status: 201 });
+    return NextResponse.json(updatedGoal);
   } catch (error) {
-    console.error('POST /api/goals error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('PATCH /api/goals/:id error:', error);
+    return NextResponse.json({ error: 'Update failed' }, { status: 500 });
   }
 } 
+

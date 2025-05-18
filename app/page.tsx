@@ -69,6 +69,24 @@ export default function HomePage() {
       setLoading(false);
     }
   } 
+    // Toggle goal completion
+  async function toggleGoalCompletion(id: string, completed: boolean) {
+    try {
+      const res = await fetch(`/api/goals?id=${id}`, { 
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: !completed }),
+      });
+
+      if (!res.ok) throw new Error('Toggle failed');
+
+      const updated = await res.json();
+      setGoals(goals.map(g => (g.id === id ? updated : g)));
+    } catch (err) {
+      console.error('Toggle error:', err);
+    }
+  }
+
 
   return (
     <main className="max-w-xl mx-auto p-4 min-h-screen bg-blue-100 text-black">
@@ -115,7 +133,7 @@ export default function HomePage() {
         </button>
       </form>
 
-      <section>
+      <section> 
         <h2 className="text-xl font-semibold mb-2">Past Vibes</h2>
         {vibes.length === 0 && <p>No vibes logged yet.</p>}
         <ul className="space-y-3">
@@ -180,16 +198,23 @@ export default function HomePage() {
   </form>
 
   <ul className="space-y-3">
-    {goals.map(goal => (
-      <li
-        key={goal.id}
-        className="border rounded p-3 shadow-sm bg-white text-black flex justify-between items-center"
-      >
-        <span>{goal.text}</span>
-        {goal.completed && <span className="text-green-500 font-semibold">✓</span>}
-      </li>
-    ))}
-  </ul>
+  {goals.map(goal => (
+    <li
+      key={goal.id}
+      className="border rounded p-3 shadow-sm bg-white text-black flex items-center space-x-3"
+    >
+      <input
+        type="checkbox"
+        checked={goal.completed}
+        onChange={() => toggleGoalCompletion(goal.id, goal.completed)}
+      />
+      <span className={goal.completed ? 'line-through text-gray-500' : ''}>
+        {goal.text}
+      </span>
+    </li>
+  ))} 
+</ul>
+
 </section> 
 
     </main>
