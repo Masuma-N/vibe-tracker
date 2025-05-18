@@ -8,6 +8,13 @@ type Vibe = {
   note?: string;
   createdAt: string;
 };
+type Goal = {
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: string;
+}; 
+
 
 export default function HomePage() {
   const [mood, setMood] = useState('');
@@ -22,6 +29,18 @@ export default function HomePage() {
       .then(setVibes)
       .catch(() => setError('Failed to load vibes'));
   }, []);
+
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [goalText, setGoalText] = useState('');
+  const [goalError, setGoalError] = useState('');
+
+  useEffect(() => {
+    fetch('/api/goals')
+      .then(res => res.json())
+      .then(setGoals)
+      .catch(() => setGoalError('Failed to load goals'));
+  }, []);
+
 
   async function submitVibe(e: React.FormEvent) {
     e.preventDefault();
@@ -49,15 +68,16 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }
+  } 
 
   return (
-    <main className="max-w-xl mx-auto p-4">
+    <main className="max-w-xl mx-auto p-4 min-h-screen bg-blue-100 text-black">
+
       <h1 className="text-3xl font-bold mb-4">Daily Vibe Tracker</h1>
 
       <form onSubmit={submitVibe} className="mb-6 space-y-4">
         <label className="block">
-          <span className="font-semibold">How are you feeling today?</span>
+          <span className="font-semibold text-black">How are you feeling today?</span>
           <select
             value={mood}
             onChange={e => setMood(e.target.value)}
@@ -113,6 +133,65 @@ export default function HomePage() {
           ))}
         </ul>
       </section>
+      <section className="mt-10">
+  <h2 className="text-xl font-semibold mb-2">Your Goals</h2>
+
+  <form
+    onSubmit={async (e) => {
+      e.preventDefault();
+      setGoalError('');
+      if (!goalText.trim()) {
+        setGoalError('Goal text is required');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/goals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: goalText }),
+        });
+
+        if (!res.ok) throw new Error('Failed to add goal');
+
+        const newGoal = await res.json();
+        setGoals([newGoal, ...goals]);
+        setGoalText('');
+      } catch {
+        setGoalError('Error submitting goal');
+      }
+    }}
+    className="space-y-4 mb-6"
+  >
+    <input
+      type="text"
+      value={goalText}
+      onChange={(e) => setGoalText(e.target.value)}
+      placeholder="Enter a new goal"
+      className="w-full border rounded px-3 py-2"
+    />
+    {goalError && <p className="text-red-500">{goalError}</p>}
+    <button
+      type="submit"
+      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+    >
+      Add Goal
+    </button>
+  </form>
+
+  <ul className="space-y-3">
+    {goals.map(goal => (
+      <li
+        key={goal.id}
+        className="border rounded p-3 shadow-sm bg-white text-black flex justify-between items-center"
+      >
+        <span>{goal.text}</span>
+        {goal.completed && <span className="text-green-500 font-semibold">✓</span>}
+      </li>
+    ))}
+  </ul>
+</section> 
+
     </main>
   );
 }  

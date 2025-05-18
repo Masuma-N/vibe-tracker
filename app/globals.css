@@ -14,9 +14,10 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #dbeafe;  /* Tailwind's blue-100 */
+  --foreground: #171717;
+} 
+
 }
 
 body {
